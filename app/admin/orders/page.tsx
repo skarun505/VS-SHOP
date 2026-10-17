@@ -14,18 +14,23 @@ export default async function AdminOrdersPage() {
     redirect("/admin");
   }
 
-  const orders = await prisma.order.findMany({
-    orderBy: {
-      createdAt: "desc",
-    },
-    include: {
-      unit: {
-        include: {
-          product: true,
+  let orders: any[] = [];
+  try {
+    orders = await prisma.order.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        unit: {
+          include: {
+            product: true,
+          },
         },
       },
-    },
-  });
+    });
+  } catch (err) {
+    console.error("Failed to load orders in admin:", err);
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">

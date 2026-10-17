@@ -33,34 +33,58 @@ export default async function AdminDashboardPage() {
   }
 
   // Fetch admin dashboard stats
-  const totalUnits = await prisma.unit.count();
-  const availableUnits = await prisma.unit.count({ where: { status: "AVAILABLE" } });
-  const reservedUnits = await prisma.unit.count({ where: { status: "RESERVED" } });
-  const soldUnits = await prisma.unit.count({ where: { status: "SOLD" } });
+  let totalUnits = 0;
+  let availableUnits = 0;
+  let reservedUnits = 0;
+  let soldUnits = 0;
+  let pendingPayments = 0;
+  let allOrders: any[] = [];
+  let totalRevenuePaise = 0;
+  let dbError: string | null = null;
 
-  const pendingPayments = await prisma.order.count({
-    where: { status: "PAYMENT_SUBMITTED" },
-  });
+  try {
+    totalUnits = await prisma.unit.count();
+    availableUnits = await prisma.unit.count({ where: { status: "AVAILABLE" } });
+    reservedUnits = await prisma.unit.count({ where: { status: "RESERVED" } });
+    soldUnits = await prisma.unit.count({ where: { status: "SOLD" } });
 
-  const allOrders = await prisma.order.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 5,
-    include: {
-      unit: {
-        include: { product: true },
+    pendingPayments = await prisma.order.count({
+      where: { status: "PAYMENT_SUBMITTED" },
+    });
+
+    allOrders = await prisma.order.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      include: {
+        unit: {
+          include: { product: true },
+        },
       },
-    },
-  });
+    });
 
-  const totalRevenuePaise = (
-    await prisma.order.findMany({
+    const revenueOrders = await prisma.order.findMany({
       where: { status: { in: ["VERIFIED", "PAID", "SHIPPED", "DELIVERED"] } },
       select: { amountPaise: true },
-    })
-  ).reduce((acc, curr) => acc + curr.amountPaise, 0);
+    });
+    totalRevenuePaise = revenueOrders.reduce((acc, curr) => acc + curr.amountPaise, 0);
+  } catch (err: any) {
+    console.error("Admin dashboard database error:", err);
+    dbError = err?.message || "Failed to connect to database";
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+      {dbError && (
+        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-200 text-sm flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-amber-600" />
+          <div>
+            <h3 className="font-bold">Database Connection Pending</h3>
+            <p className="text-xs mt-1 text-slate-600 dark:text-slate-400">
+              Prisma could not connect to the database. Please verify that <code>DATABASE_URL</code> is correctly configured in your Vercel Project Settings with your Supabase credentials.
+            </p>
+          </div>
+        </div>
+      )}
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-6">
         <div>

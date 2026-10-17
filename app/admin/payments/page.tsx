@@ -14,21 +14,26 @@ export default async function AdminPaymentsPage() {
     redirect("/admin");
   }
 
-  const pendingOrders = await prisma.order.findMany({
-    where: {
-      status: "PAYMENT_SUBMITTED",
-    },
-    orderBy: {
-      utrSubmittedAt: "asc",
-    },
-    include: {
-      unit: {
-        include: {
-          product: true,
+  let pendingOrders: any[] = [];
+  try {
+    pendingOrders = await prisma.order.findMany({
+      where: {
+        status: "PAYMENT_SUBMITTED",
+      },
+      orderBy: {
+        utrSubmittedAt: "asc",
+      },
+      include: {
+        unit: {
+          include: {
+            product: true,
+          },
         },
       },
-    },
-  });
+    });
+  } catch (err) {
+    console.error("Failed to load pending payments in admin:", err);
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">

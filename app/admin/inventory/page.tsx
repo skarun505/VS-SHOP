@@ -14,34 +14,40 @@ export default async function AdminInventoryPage() {
     redirect("/admin");
   }
 
-  const products = await prisma.product.findMany({
-    select: {
-      id: true,
-      title: true,
-      brand: true,
-      modelNumber: true,
-      mrp: true,
-    },
-    orderBy: {
-      title: "asc",
-    },
-  });
+  let products: any[] = [];
+  let units: any[] = [];
+  try {
+    products = await prisma.product.findMany({
+      select: {
+        id: true,
+        title: true,
+        brand: true,
+        modelNumber: true,
+        mrp: true,
+      },
+      orderBy: {
+        title: "asc",
+      },
+    });
 
-  const units = await prisma.unit.findMany({
-    include: {
-      product: {
-        select: {
-          id: true,
-          title: true,
-          modelNumber: true,
-          mrp: true,
+    units = await prisma.unit.findMany({
+      include: {
+        product: {
+          select: {
+            id: true,
+            title: true,
+            modelNumber: true,
+            mrp: true,
+          },
         },
       },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  } catch (err) {
+    console.error("Failed to load inventory in admin:", err);
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
