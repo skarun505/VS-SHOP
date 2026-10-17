@@ -1,0 +1,121 @@
+// PostgreSQL Prisma Schema for Production (Vercel + Neon / Supabase)
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Grade {
+  A_PLUS
+  A
+  B
+  C
+}
+
+enum Source {
+  REFURBISHED
+  OPEN_BOX
+  REPAIRED
+  PREOWNED
+}
+
+enum OrderStatus {
+  AWAITING_PAYMENT
+  PAYMENT_SUBMITTED
+  VERIFIED
+  REJECTED
+  PENDING
+  PAID
+  FAILED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentMode {
+  RAZORPAY
+  MANUAL_UPI
+}
+
+model Product {
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  title          String
+  brand          String
+  modelNumber    String
+  category       String
+  description    String
+  images         String[]
+  mrp            Int
+  warrantyMonths Int      @default(6)
+  returnDays     Int      @default(7)
+  units          Unit[]
+  reviews        Review[]
+  createdAt      DateTime @default(now())
+}
+
+model Unit {
+  id            String    @id @default(cuid())
+  productId     String
+  product       Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  serialOrImei  String    @unique
+  grade         Grade
+  source        Source
+  costPaise     Int
+  repairNotes   String?
+  repairPhotos  String[]
+  batteryHealth Int?
+  pricePaise    Int
+  floorPaise    Int
+  status        String    @default("AVAILABLE")
+  reservedUntil DateTime?
+  order         Order?
+  createdAt     DateTime  @default(now())
+}
+
+model Order {
+  id             String      @id @default(cuid())
+  userId         String      @default("guest")
+  unitId         String      @unique
+  unit           Unit        @relation(fields: [unitId], references: [id])
+  amountPaise    Int
+  couponCode     String?
+  discountPaise  Int         @default(0)
+  status         OrderStatus @default(AWAITING_PAYMENT)
+  paymentMode    PaymentMode @default(MANUAL_UPI)
+  rzpOrderId     String?     @unique
+  rzpPaymentId   String?
+  utr            String?     @unique
+  utrSubmittedAt DateTime?
+  payerName      String?
+  screenshotUrl  String?
+  verifiedBy     String?
+  verifiedAt     DateTime?
+  rejectReason   String?
+  shippingJson   Json
+  invoiceNo      String?     @unique
+  createdAt      DateTime    @default(now())
+}
+
+model Coupon {
+  code       String  @id
+  percentOff Int
+  maxUses    Int
+  used       Int     @default(0)
+  active     Boolean @default(true)
+}
+
+model Review {
+  id               String   @id @default(cuid())
+  productId        String
+  product          Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userName         String
+  rating           Int      @default(5)
+  comment          String
+  verifiedPurchase Boolean  @default(true)
+  createdAt        DateTime @default(now())
+}
