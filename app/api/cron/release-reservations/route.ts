@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { releaseExpiredReservations } from "@/lib/inventory";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: Request) {
   try {
     const releasedCount = await releaseExpiredReservations();

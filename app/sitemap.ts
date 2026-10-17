@@ -4,16 +4,21 @@ import { prisma } from "@/lib/prisma";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
-  const products = await prisma.product.findMany({
-    select: { slug: true, createdAt: true },
-  });
+  let productUrls: MetadataRoute.Sitemap = [];
+  try {
+    const products = await prisma.product.findMany({
+      select: { slug: true, createdAt: true },
+    });
 
-  const productUrls: MetadataRoute.Sitemap = products.map((p) => ({
-    url: `${baseUrl}/product/${p.slug}`,
-    lastModified: p.createdAt,
-    changeFrequency: "daily",
-    priority: 0.8,
-  }));
+    productUrls = products.map((p) => ({
+      url: `${baseUrl}/product/${p.slug}`,
+      lastModified: p.createdAt,
+      changeFrequency: "daily",
+      priority: 0.8,
+    }));
+  } catch (err) {
+    console.warn("Sitemap: Skipping dynamic products during build:", err);
+  }
 
   const categoryUrls: MetadataRoute.Sitemap = [
     "smartphones",

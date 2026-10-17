@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { ProductDetailClient } from "@/components/ProductDetailClient";
 import type { Metadata } from "next";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 interface ProductPageProps {
   params: {
@@ -13,9 +13,14 @@ interface ProductPageProps {
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
-  const product = await prisma.product.findUnique({
-    where: { slug: params.slug },
-  });
+  let product: any = null;
+  try {
+    product = await prisma.product.findUnique({
+      where: { slug: params.slug },
+    });
+  } catch (e) {
+    // fallback during static checks
+  }
 
   if (!product) {
     return { title: "Product Not Found | PristineTech" };

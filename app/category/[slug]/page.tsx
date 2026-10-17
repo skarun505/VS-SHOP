@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { ProductCard } from "@/components/ProductCard";
 import { ArrowLeft, Tag } from "lucide-react";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 interface CategoryPageProps {
   params: {
@@ -38,11 +38,13 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     notFound();
   }
 
-  const products = await prisma.product.findMany({
-    where: {
-      category: params.slug,
-    },
-    include: {
+  let products: any[] = [];
+  try {
+    products = await prisma.product.findMany({
+      where: {
+        category: params.slug,
+      },
+      include: {
       units: true,
       reviews: true,
     },
@@ -50,6 +52,9 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       createdAt: "desc",
     },
   });
+  } catch (err) {
+    console.warn("Prisma query skipped in category page:", err);
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">

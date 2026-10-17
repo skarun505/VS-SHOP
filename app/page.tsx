@@ -5,18 +5,23 @@ import { ProductCard } from "@/components/ProductCard";
 import { TrustBlock } from "@/components/TrustBlock";
 import { Sparkles, ShieldCheck, Cpu, ArrowRight, Smartphone, Laptop, Tv, CheckCircle, Tag } from "lucide-react";
 
-export const revalidate = 60; // ISR revalidate every 60 seconds
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const products = await prisma.product.findMany({
-    include: {
-      units: true,
-      reviews: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  let products: any[] = [];
+  try {
+    products = await prisma.product.findMany({
+      include: {
+        units: true,
+        reviews: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  } catch (err) {
+    console.warn("Prisma query skipped during build/offline:", err);
+  }
 
   return (
     <div className="space-y-16 pb-16">
