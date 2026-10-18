@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { ProductDetailClient } from "@/components/ProductDetailClient";
 import type { Metadata } from "next";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 30;
 
 interface ProductPageProps {
   params: {

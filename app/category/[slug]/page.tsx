@@ -6,7 +6,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { MobileSearchBar } from "@/components/MobileSearchBar";
 import { ArrowLeft, Tag } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 30;
 
 interface CategoryPageProps {
   params: {

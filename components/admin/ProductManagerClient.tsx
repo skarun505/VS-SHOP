@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { formatINR } from "@/lib/utils";
 import { ProductImageUploader } from "./ProductImageUploader";
+import { BulkProductImporter } from "./BulkProductImporter";
 
 
 interface Product {
@@ -50,6 +51,7 @@ export function ProductManagerClient({ initialProducts }: ProductManagerClientPr
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [modalOpen, setModalOpen] = useState(false);
+  const [bulkModalOpen, setBulkModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   // Form State
@@ -213,13 +215,25 @@ export function ProductManagerClient({ initialProducts }: ProductManagerClientPr
           </p>
         </div>
 
-        <button
-          onClick={openCreateModal}
-          className="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-colors shadow-sm self-start sm:self-auto"
-        >
-          <PlusCircle className="w-4 h-4" />
-          <span>Add New Product</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          <button
+            type="button"
+            onClick={() => setBulkModalOpen(true)}
+            className="px-4 py-3 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-emerald-600 dark:hover:bg-emerald-600 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-colors shadow-sm"
+          >
+            <Layers className="w-4 h-4 text-emerald-400" />
+            <span>Bulk Import (CSV)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={openCreateModal}
+            className="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-colors shadow-sm"
+          >
+            <PlusCircle className="w-4 h-4" />
+            <span>Add Single Product</span>
+          </button>
+        </div>
       </div>
 
       {/* Summary KPI Badges */}
@@ -600,6 +614,16 @@ export function ProductManagerClient({ initialProducts }: ProductManagerClientPr
             </form>
           </div>
         </div>
+      )}
+      {/* Bulk Product Importer Modal */}
+      {bulkModalOpen && (
+        <BulkProductImporter
+          onSuccess={(newProducts) => {
+            setProducts((prev) => [...newProducts, ...prev]);
+            setBulkModalOpen(false);
+          }}
+          onClose={() => setBulkModalOpen(false)}
+        />
       )}
     </div>
   );

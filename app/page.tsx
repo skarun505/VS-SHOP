@@ -7,7 +7,7 @@ import { MobileCategoryTray } from "@/components/MobileCategoryTray";
 import { StorefrontCatalog } from "@/components/StorefrontCatalog";
 import { Sparkles, ShieldCheck, Cpu, ArrowRight, Smartphone, Laptop, Tv, CheckCircle, Tag, Zap } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 30;
 
 export default async function HomePage() {
   let products: any[] = [];

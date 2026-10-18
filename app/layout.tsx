@@ -22,6 +22,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://mdattxewghzooverrrxe.supabase.co" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://mdattxewghzooverrrxe.supabase.co" />
+        <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://images.unsplash.com" />
+      </head>
       <body className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
         <Navbar />
         <main className="flex-1">{children}</main>
