@@ -18,6 +18,8 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { formatINR } from "@/lib/utils";
+import { ProductImageUploader } from "./ProductImageUploader";
+
 
 interface Product {
   id: string;
@@ -59,7 +61,7 @@ export function ProductManagerClient({ initialProducts }: ProductManagerClientPr
   const [warrantyMonths, setWarrantyMonths] = useState("6");
   const [returnDays, setReturnDays] = useState("7");
   const [description, setDescription] = useState("");
-  const [imagesText, setImagesText] = useState("");
+  const [imagesList, setImagesList] = useState<string[]>([]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -75,7 +77,9 @@ export function ProductManagerClient({ initialProducts }: ProductManagerClientPr
     setWarrantyMonths("6");
     setReturnDays("7");
     setDescription("");
-    setImagesText("https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=1000&q=80");
+    setImagesList([
+      "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=1000&q=80"
+    ]);
     setError(null);
     setSuccess(null);
     setModalOpen(true);
@@ -95,10 +99,11 @@ export function ProductManagerClient({ initialProducts }: ProductManagerClientPr
     let parsed: string[] = [];
     try {
       parsed = JSON.parse(p.images);
+      if (!Array.isArray(parsed)) parsed = [];
     } catch {
-      parsed = [];
+      parsed = p.images ? [p.images] : [];
     }
-    setImagesText(parsed.join("\n"));
+    setImagesList(parsed);
     setError(null);
     setSuccess(null);
     setModalOpen(true);
@@ -125,7 +130,7 @@ export function ProductManagerClient({ initialProducts }: ProductManagerClientPr
         warrantyMonths,
         returnDays,
         description,
-        images: imagesText,
+        images: imagesList,
       };
 
       const res = await fetch(url, {
@@ -556,18 +561,11 @@ export function ProductManagerClient({ initialProducts }: ProductManagerClientPr
                 </div>
               </div>
 
-              <div>
-                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Product Image URLs (One URL per line)
-                </label>
-                <textarea
-                  rows={2}
-                  placeholder="https://images.unsplash.com/photo-..."
-                  value={imagesText}
-                  onChange={(e) => setImagesText(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                />
-              </div>
+              <ProductImageUploader
+                images={imagesList}
+                onChange={setImagesList}
+              />
+
 
               <div>
                 <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
