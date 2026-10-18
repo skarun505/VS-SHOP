@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ConditionBadge } from "./ConditionBadge";
 import { WarrantyStrip } from "./WarrantyStrip";
@@ -19,6 +19,7 @@ import {
   Zap,
   ArrowRight,
   User,
+  Loader2,
 } from "lucide-react";
 
 interface UnitType {
@@ -78,13 +79,22 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
   const defaultUnit = availableUnits[0] || product.units[0];
   const [selectedUnit, setSelectedUnit] = useState<UnitType | null>(defaultUnit || null);
   const [showTechnicalReport, setShowTechnicalReport] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+
+  // Instant prefetch checkout page into memory as soon as unit is selected
+  useEffect(() => {
+    if (selectedUnit) {
+      router.prefetch(`/checkout?unitId=${selectedUnit.id}`);
+    }
+  }, [selectedUnit, router]);
 
   const price = selectedUnit ? selectedUnit.pricePaise : product.mrp;
   const savingsPercent = calculateSavingsPercent(product.mrp, price);
 
   // Handle Buy
   const handleProceedToCheckout = () => {
-    if (!selectedUnit) return;
+    if (!selectedUnit || isNavigating) return;
+    setIsNavigating(true);
     const url = `/checkout?unitId=${selectedUnit.id}`;
     router.push(url);
   };
@@ -173,14 +183,23 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
             <button
               type="button"
               onClick={handleProceedToCheckout}
-              disabled={!selectedUnit || selectedUnit.status === "SOLD"}
+              disabled={!selectedUnit || selectedUnit.status === "SOLD" || isNavigating}
               className="w-full py-4 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-base shadow-lg shadow-emerald-600/30 transition-all transform active:scale-[0.99] flex items-center justify-center gap-2.5 disabled:bg-slate-300 disabled:cursor-not-allowed"
             >
-              <Zap className="w-5 h-5 fill-white" />
-              <span>
-                {selectedUnit?.status === "SOLD" ? "Sold Out" : "Buy Now &bull; Instant Checkout"}
-              </span>
-              <ArrowRight className="w-5 h-5" />
+              {isNavigating ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Opening Checkout...</span>
+                </>
+              ) : (
+                <>
+                  <Zap className="w-5 h-5 fill-white" />
+                  <span>
+                    {selectedUnit?.status === "SOLD" ? "Sold Out" : "Buy Now &bull; Instant Checkout"}
+                  </span>
+                  <ArrowRight className="w-5 h-5" />
+                </>
+              )}
             </button>
 
             {/* Quick trust reassurance right under Buy button */}
@@ -361,11 +380,20 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
         <button
           type="button"
           onClick={handleProceedToCheckout}
-          disabled={!selectedUnit || selectedUnit.status === "SOLD"}
+          disabled={!selectedUnit || selectedUnit.status === "SOLD" || isNavigating}
           className="flex-1 max-w-[200px] py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider shadow-md shadow-emerald-600/30 flex items-center justify-center gap-1.5 disabled:opacity-50 active:scale-95 transition-all"
         >
-          <Zap className="w-4 h-4 fill-white" />
-          <span>{selectedUnit?.status === "SOLD" ? "Sold Out" : "Buy Now"}</span>
+          {isNavigating ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Opening...</span>
+            </>
+          ) : (
+            <>
+              <Zap className="w-4 h-4 fill-white" />
+              <span>{selectedUnit?.status === "SOLD" ? "Sold Out" : "Buy Now"}</span>
+            </>
+          )}
         </button>
       </div>
     </div>

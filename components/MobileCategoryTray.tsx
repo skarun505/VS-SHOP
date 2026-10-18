@@ -73,6 +73,7 @@ export function MobileCategoryTray() {
             <Link
               key={i}
               href={c.href}
+              prefetch={true}
               className="flex flex-col items-center shrink-0 group active:scale-95 transition-transform"
             >
               <div className="relative">

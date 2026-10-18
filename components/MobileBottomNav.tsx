@@ -27,6 +27,7 @@ export function MobileBottomNav() {
       {/* 1. Home */}
       <Link
         href="/"
+        prefetch={true}
         className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all relative ${
           isHome
             ? "text-emerald-600 font-extrabold"
@@ -43,6 +44,7 @@ export function MobileBottomNav() {
       {/* 2. Categories */}
       <Link
         href="/category/smartphones"
+        prefetch={true}
         className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all relative ${
           isCategory
             ? "text-emerald-600 font-extrabold"
@@ -73,6 +75,7 @@ export function MobileBottomNav() {
       {/* 4. Track Order */}
       <Link
         href="/order/lookup"
+        prefetch={true}
         className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all relative ${
           isOrder
             ? "text-emerald-600 font-extrabold"
@@ -89,6 +92,7 @@ export function MobileBottomNav() {
       {/* 5. Warranty */}
       <Link
         href="/grading-guide"
+        prefetch={true}
         className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all relative ${
           isWarranty
             ? "text-emerald-600 font-extrabold"

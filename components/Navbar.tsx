@@ -34,22 +34,22 @@ export function Navbar() {
 
         {/* Categories Nav (Desktop) */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600 dark:text-slate-300">
-          <Link href="/" className="hover:text-emerald-600 transition-colors">
+          <Link href="/" prefetch={true} className="hover:text-emerald-600 transition-colors">
             All Deals
           </Link>
-          <Link href="/category/smartphones" className="hover:text-emerald-600 transition-colors flex items-center gap-1.5">
+          <Link href="/category/smartphones" prefetch={true} className="hover:text-emerald-600 transition-colors flex items-center gap-1.5">
             <Smartphone className="w-4 h-4" />
             Phones
           </Link>
-          <Link href="/category/laptops" className="hover:text-emerald-600 transition-colors flex items-center gap-1.5">
+          <Link href="/category/laptops" prefetch={true} className="hover:text-emerald-600 transition-colors flex items-center gap-1.5">
             <Laptop className="w-4 h-4" />
             Laptops
           </Link>
-          <Link href="/category/televisions" className="hover:text-emerald-600 transition-colors flex items-center gap-1.5">
+          <Link href="/category/televisions" prefetch={true} className="hover:text-emerald-600 transition-colors flex items-center gap-1.5">
             <Tv className="w-4 h-4" />
             TVs
           </Link>
-          <Link href="/category/appliances" className="hover:text-emerald-600 transition-colors">
+          <Link href="/category/appliances" prefetch={true} className="hover:text-emerald-600 transition-colors">
             Appliances
           </Link>
         </nav>
@@ -58,6 +58,7 @@ export function Navbar() {
         <div className="flex items-center gap-1.5 sm:gap-3">
           <Link
             href="/order/lookup"
+            prefetch={true}
             className="text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-emerald-600 flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:bg-white transition-all shadow-xs"
           >
             <Search className="w-3.5 h-3.5 text-emerald-600" />
@@ -67,6 +68,7 @@ export function Navbar() {
 
           <Link
             href="/grading-guide"
+            prefetch={true}
             className="hidden sm:flex text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-emerald-600 items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:bg-white transition-all shadow-xs"
           >
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />

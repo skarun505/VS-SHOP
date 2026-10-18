@@ -33,6 +33,15 @@ const CATEGORY_NAMES: Record<string, { title: string; desc: string }> = {
   },
 };
 
+export function generateStaticParams() {
+  return [
+    { slug: "smartphones" },
+    { slug: "laptops" },
+    { slug: "televisions" },
+    { slug: "appliances" },
+  ];
+}
+
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const categoryInfo = CATEGORY_NAMES[params.slug];
   if (!categoryInfo) {

@@ -63,6 +63,7 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <Link
       href={`/product/${product.slug}`}
+      prefetch={true}
       className="group flex flex-col rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs hover:shadow-md hover:border-emerald-500 transition-all duration-200 overflow-hidden active:scale-[0.98]"
     >
       {/* 1. CLEAN Product Image (Zero overlays covering the photo) */}
