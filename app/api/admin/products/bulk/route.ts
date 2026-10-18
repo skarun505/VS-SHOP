@@ -87,9 +87,16 @@ export async function POST(req: Request) {
         serials = [item.serialOrImei.trim()];
       }
 
-      // If no serial provided, generate standard unit serial
+      // If count or quantity specified, ensure that many serial units are generated
+      const reqCount = Math.max(1, parseInt(item.count || item.quantity || "1", 10));
       if (serials.length === 0) {
-        serials = [`SN-${Date.now().toString().slice(-6)}-${i + 1}`];
+        serials = Array.from({ length: reqCount }).map(
+          (_, idx) => `SN-${Date.now().toString().slice(-6)}-${i + 1}-${idx + 1}`
+        );
+      } else {
+        while (serials.length < reqCount) {
+          serials.push(`SN-${Date.now().toString().slice(-6)}-${i + 1}-${serials.length + 1}`);
+        }
       }
 
       try {

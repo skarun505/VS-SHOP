@@ -19,11 +19,11 @@ interface BulkProductImporterProps {
   onClose: () => void;
 }
 
-const SAMPLE_CSV = `title,brand,modelNumber,category,mrpInr,priceInr,grade,serialOrImeis,batteryHealth,description,images
-iPhone 15 Pro 128GB,Apple,A2848,smartphones,134900,89999,A_PLUS,"IMEI-358921001,IMEI-358921002",98,"Certified untouched like-new condition.",https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=800&q=80
-MacBook Air M2 13-inch,Apple,A2681,laptops,114900,74999,A_PLUS,SN-C02GF9281,100,"Battery cycles under 5. Untouched body.",https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80
-Sony Bravia 55 OLED 4K,Sony,XR-55A80L,televisions,149900,92999,A,SN-SONY-55-901,,"Zero burn-in certified. Factory wall mount included.",https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?auto=format&fit=crop&w=800&q=80
-LG 8kg AI Front Load Washer,LG,FHM1408BDW,appliances,48990,28999,A,SN-LG-WASH-102,,"Sanitized drum and 42-point motor calibration.",https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?auto=format&fit=crop&w=800&q=80`;
+const SAMPLE_CSV = `title,brand,modelNumber,category,mrpInr,priceInr,count,grade,serialOrImeis,batteryHealth,description,images
+iPhone 15 Pro 128GB,Apple,A2848,smartphones,134900,89999,5,A_PLUS,"IMEI-358921001,IMEI-358921002",98,"Certified untouched like-new condition.",https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=800&q=80
+MacBook Air M2 13-inch,Apple,A2681,laptops,114900,74999,3,A_PLUS,SN-C02GF9281,100,"Battery cycles under 5. Untouched body.",https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80
+Sony Bravia 55 OLED 4K,Sony,XR-55A80L,televisions,149900,92999,2,A,SN-SONY-55-901,,"Zero burn-in certified. Factory wall mount included.",https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?auto=format&fit=crop&w=800&q=80
+LG 8kg AI Front Load Washer,LG,FHM1408BDW,appliances,48990,28999,4,A,SN-LG-WASH-102,,"Sanitized drum and 42-point motor calibration.",https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?auto=format&fit=crop&w=800&q=80`;
 
 export function BulkProductImporter({ onSuccess, onClose }: BulkProductImporterProps) {
   const [activeTab, setActiveTab] = useState<"upload" | "paste">("upload");
@@ -298,6 +298,7 @@ export function BulkProductImporter({ onSuccess, onClose }: BulkProductImporterP
                       <th className="p-2.5">Brand</th>
                       <th className="p-2.5">Category</th>
                       <th className="p-2.5">Price (₹)</th>
+                      <th className="p-2.5">Stock Count</th>
                       <th className="p-2.5">Grade</th>
                       <th className="p-2.5">IMEI / Serial</th>
                     </tr>
@@ -313,6 +314,9 @@ export function BulkProductImporter({ onSuccess, onClose }: BulkProductImporterP
                         <td className="p-2.5 capitalize">{row.category || "smartphones"}</td>
                         <td className="p-2.5 font-mono font-bold text-emerald-600">
                           ₹{Number(row.priceinr || row.priceInr || 0).toLocaleString("en-IN")}
+                        </td>
+                        <td className="p-2.5 font-bold text-emerald-600">
+                          {row.count || row.quantity || (row.serialorimeis ? row.serialorimeis.split(",").length : 1)} Units
                         </td>
                         <td className="p-2.5 font-bold">{row.grade || "A+"}</td>
                         <td className="p-2.5 font-mono text-slate-500 text-[11px] truncate max-w-[120px]">

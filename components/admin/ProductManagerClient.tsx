@@ -64,6 +64,10 @@ export function ProductManagerClient({ initialProducts }: ProductManagerClientPr
   const [returnDays, setReturnDays] = useState("7");
   const [description, setDescription] = useState("");
   const [imagesList, setImagesList] = useState<string[]>([]);
+  const [stockCount, setStockCount] = useState("3");
+  const [sellingPriceInr, setSellingPriceInr] = useState("");
+  const [conditionGrade, setConditionGrade] = useState("A_PLUS");
+  const [addStockCount, setAddStockCount] = useState("0");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -79,6 +83,10 @@ export function ProductManagerClient({ initialProducts }: ProductManagerClientPr
     setWarrantyMonths("6");
     setReturnDays("7");
     setDescription("");
+    setStockCount("3");
+    setSellingPriceInr("");
+    setConditionGrade("A_PLUS");
+    setAddStockCount("0");
     setImagesList([
       "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=1000&q=80"
     ]);
@@ -97,6 +105,11 @@ export function ProductManagerClient({ initialProducts }: ProductManagerClientPr
     setWarrantyMonths(p.warrantyMonths.toString());
     setReturnDays(p.returnDays.toString());
     setDescription(p.description);
+    setStockCount(p.units?.length.toString() || "1");
+    setAddStockCount("0");
+    const minUnit = p.units?.length > 0 ? Math.min(...p.units.map((u) => u.pricePaise)) : 0;
+    setSellingPriceInr(minUnit > 0 ? (minUnit / 100).toString() : ((p.mrp * 0.75) / 100).toString());
+    setConditionGrade(p.units?.[0]?.grade || "A_PLUS");
 
     let parsed: string[] = [];
     try {
@@ -129,6 +142,10 @@ export function ProductManagerClient({ initialProducts }: ProductManagerClientPr
         modelNumber,
         category,
         mrpInr,
+        sellingPriceInr,
+        stockCount,
+        conditionGrade,
+        addStockCount,
         warrantyMonths,
         returnDays,
         description,
@@ -572,6 +589,82 @@ export function ProductManagerClient({ initialProducts }: ProductManagerClientPr
                     onChange={(e) => setReturnDays(e.target.value)}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                   />
+                </div>
+              </div>
+
+              {/* Inventory & Stock Count Section */}
+              <div className="p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-slate-100 text-xs">
+                    <Sparkles className="w-4 h-4 text-emerald-600" />
+                    <span>Inventory &amp; In-Stock Units</span>
+                  </div>
+                  {editingProduct && (
+                    <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
+                      Current Live Stock: {editingProduct.units?.length || 0} Units
+                    </span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      {editingProduct ? "Add More Stock (Count)" : "In-Stock Quantity (Count) *"}
+                    </label>
+                    <input
+                      type="number"
+                      min={editingProduct ? "0" : "1"}
+                      max="1000"
+                      required={!editingProduct}
+                      value={editingProduct ? addStockCount : stockCount}
+                      onChange={(e) =>
+                        editingProduct
+                          ? setAddStockCount(e.target.value)
+                          : setStockCount(e.target.value)
+                      }
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 font-bold text-emerald-600 text-sm focus:outline-none"
+                      placeholder={editingProduct ? "+ 0 units" : "e.g. 5"}
+                    />
+                    <span className="text-[10px] text-slate-400 mt-0.5 block">
+                      {editingProduct ? "Enter units to add" : "How many units we have in stock"}
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      Selling Price (₹) *
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      min="1"
+                      placeholder="e.g. 84999"
+                      value={sellingPriceInr}
+                      onChange={(e) => setSellingPriceInr(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 font-mono font-bold text-sm focus:outline-none"
+                    />
+                    <span className="text-[10px] text-slate-400 mt-0.5 block">
+                      Customer purchase price
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      Condition Grade
+                    </label>
+                    <select
+                      value={conditionGrade}
+                      onChange={(e) => setConditionGrade(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 font-bold focus:outline-none text-xs"
+                    >
+                      <option value="A_PLUS">Grade A+ (Untouched Mint)</option>
+                      <option value="A">Grade A (Like New, 0 Marks)</option>
+                      <option value="B">Grade B (Certified Very Good)</option>
+                    </select>
+                    <span className="text-[10px] text-slate-400 mt-0.5 block">
+                      Factory quality grade
+                    </span>
+                  </div>
                 </div>
               </div>
 
