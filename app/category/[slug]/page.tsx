@@ -57,7 +57,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-10 space-y-6 sm:space-y-8 pb-20">
       {/* Breadcrumb / Back button */}
       <div>
         <Link
@@ -70,22 +70,22 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       </div>
 
       {/* Header */}
-      <div className="border-b border-slate-200 dark:border-slate-800 pb-6">
+      <div className="border-b border-slate-200 dark:border-slate-800 pb-4 sm:pb-6">
         <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 uppercase tracking-widest mb-1">
           <Tag className="w-3.5 h-3.5" />
           Category Showcase
         </div>
-        <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100">
+        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100">
           {categoryInfo.title}
         </h1>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 max-w-2xl">
+        <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl">
           {categoryInfo.desc}
         </p>
       </div>
 
       {/* Product count and grid */}
       <div>
-        <div className="text-xs font-medium text-slate-500 mb-4">
+        <div className="text-xs font-medium text-slate-500 mb-3 sm:mb-4">
           Showing {products.length} models with verified physical inventory
         </div>
 
@@ -97,7 +97,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-6">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}

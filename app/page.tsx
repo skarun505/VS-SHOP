@@ -3,7 +3,9 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { ProductCard } from "@/components/ProductCard";
 import { TrustBlock } from "@/components/TrustBlock";
-import { Sparkles, ShieldCheck, Cpu, ArrowRight, Smartphone, Laptop, Tv, CheckCircle, Tag } from "lucide-react";
+import { MobileSearchBar } from "@/components/MobileSearchBar";
+import { MobileCategoryTray } from "@/components/MobileCategoryTray";
+import { Sparkles, ShieldCheck, Cpu, ArrowRight, Smartphone, Laptop, Tv, CheckCircle, Tag, Zap } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +26,13 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="space-y-16 pb-16">
+    <div className="space-y-8 sm:space-y-16 pb-24 sm:pb-16">
+      {/* Mobile App Header (Search + Location - Amazon/Zepto style) */}
+      <MobileSearchBar />
+
+      {/* Mobile Zepto/Flipkart Category Circles */}
+      <MobileCategoryTray />
+
       {/* Hero Banner Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-emerald-950 via-slate-900 to-slate-950 text-white py-16 sm:py-24 border-b border-emerald-900/30">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.15),transparent_50%)]" />
@@ -190,23 +198,39 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Main Deals Grid */}
-      <section id="deals" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
+      {/* Main Deals Grid (Flipkart/Amazon/Zepto 2-Column Mobile Grid) */}
+      <section id="deals" className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        {/* Flash Deals / Top Savings Banner (Amazon/Zepto style) */}
+        <div className="mb-4 sm:mb-6 p-3 sm:p-4 rounded-2xl bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white flex items-center justify-between shadow-md">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 bg-white/20 rounded-xl backdrop-blur-xs">
+              <Sparkles className="w-4 h-4 text-amber-200 animate-pulse" />
+            </div>
+            <div>
+              <div className="text-xs sm:text-sm font-black tracking-tight">⚡ Flash Deals &bull; Up to 55% Off Retail</div>
+              <div className="text-[10px] sm:text-xs text-white/90">Insured Doorstep Shipping &bull; 6-Month Warranty Included</div>
+            </div>
+          </div>
+          <span className="hidden sm:inline-block text-xs font-bold px-3 py-1 bg-white text-rose-600 rounded-full shadow-xs">
+            Limited Stock
+          </span>
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-4 sm:mb-8 gap-2 sm:gap-4">
           <div>
-            <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-1">
+            <div className="text-[11px] sm:text-xs font-bold text-emerald-600 uppercase tracking-widest mb-0.5">
               Tested &bull; Graded &bull; Ready To Dispatch
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100">
-              Available Pristine Collections
+            <h2 className="text-xl sm:text-3xl font-black text-slate-900 dark:text-slate-100">
+              Available Pristine Tech
             </h2>
           </div>
-          <p className="text-xs sm:text-sm text-slate-500 max-w-md">
+          <p className="text-xs sm:text-sm text-slate-500 max-w-md hidden sm:block">
             Showing available units verified to factory perfection. Click any model to review its individual specifications, battery health, and warranty.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-6">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

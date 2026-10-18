@@ -326,6 +326,35 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
 
       {/* Trust Block at bottom */}
       <TrustBlock />
+
+      {/* Sticky Mobile Buy Bar (Amazon / Flipkart style) */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-4 py-3 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-[10px] text-slate-400 font-semibold uppercase truncate">
+            {selectedUnit ? `Unit ••••${selectedUnit.serialOrImei.slice(-4)}` : "Price"}
+          </div>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-lg font-black text-slate-900 dark:text-slate-100 font-mono">
+              {formatINR(price)}
+            </span>
+            {savingsPercent > 0 && (
+              <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950 px-1.5 py-0.2 rounded">
+                {savingsPercent}% OFF
+              </span>
+            )}
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleProceedToCheckout}
+          disabled={!selectedUnit || selectedUnit.status === "SOLD"}
+          className="flex-1 max-w-[200px] py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-emerald-600/30 flex items-center justify-center gap-1.5 disabled:opacity-50 active:scale-95 transition-all"
+        >
+          <ShoppingBag className="w-4 h-4" />
+          <span>{selectedUnit?.status === "SOLD" ? "Sold Out" : "Buy Now"}</span>
+        </button>
+      </div>
     </div>
   );
 }
