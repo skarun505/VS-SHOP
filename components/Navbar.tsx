@@ -7,22 +7,24 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 dark:border-slate-800 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md">
       {/* Top micro-announcement banner */}
-      <div className="bg-emerald-600 text-white px-4 py-1.5 text-center text-xs font-medium flex items-center justify-center gap-2">
-        <Sparkles className="w-3.5 h-3.5" />
-        <span>100% Genuine Certified Devices &bull; Pristine Untouched Condition &bull; Doorstep 7-Day Free Returns</span>
+      <div className="bg-emerald-600 text-white px-3 sm:px-4 py-1 sm:py-1.5 text-center text-[11px] sm:text-xs font-medium flex items-center justify-center gap-1.5 sm:gap-2">
+        <Sparkles className="w-3.5 h-3.5 shrink-0" />
+        <span className="truncate sm:overflow-visible">
+          100% Genuine Certified Devices &bull; Pristine Untouched Condition &bull; 7-Day Free Returns
+        </span>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-4">
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="relative h-10 w-auto flex items-center">
+          <div className="relative h-9 sm:h-10 w-auto flex items-center">
             <Image
               src="/logo.png"
               alt="Vercel Shop"
               width={160}
               height={44}
               priority
-              className="h-9 w-auto object-contain transition-transform group-hover:scale-105"
+              className="h-8 sm:h-9 w-auto object-contain transition-transform group-hover:scale-105"
             />
           </div>
           <span className="hidden sm:inline-block text-[10px] uppercase font-bold tracking-widest text-emerald-600 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
@@ -53,15 +55,49 @@ export function Navbar() {
         </nav>
 
         {/* Right side actions - Admin portal removed from storefront (accessed via /admin directly) */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Link
             href="/order/lookup"
-            className="text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-emerald-600 flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:bg-white transition-all shadow-xs"
+            className="text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-emerald-600 flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:bg-white transition-all shadow-xs"
           >
             <Search className="w-3.5 h-3.5 text-emerald-600" />
             <span>Track Order</span>
           </Link>
         </div>
+      </div>
+
+      {/* Mobile Horizontal Category Pills */}
+      <div className="md:hidden flex items-center gap-2 overflow-x-auto no-scrollbar py-2 px-4 border-t border-slate-100 dark:border-slate-900 bg-slate-50/50 dark:bg-slate-950/50 text-[11px] font-semibold">
+        <Link
+          href="/"
+          className="px-3 py-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shrink-0 text-slate-700 dark:text-slate-300 hover:border-emerald-500"
+        >
+          All Deals
+        </Link>
+        <Link
+          href="/category/smartphones"
+          className="px-3 py-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shrink-0 text-slate-700 dark:text-slate-300 hover:border-emerald-500"
+        >
+          Smartphones
+        </Link>
+        <Link
+          href="/category/laptops"
+          className="px-3 py-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shrink-0 text-slate-700 dark:text-slate-300 hover:border-emerald-500"
+        >
+          Laptops
+        </Link>
+        <Link
+          href="/category/televisions"
+          className="px-3 py-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shrink-0 text-slate-700 dark:text-slate-300 hover:border-emerald-500"
+        >
+          4K TVs
+        </Link>
+        <Link
+          href="/category/appliances"
+          className="px-3 py-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shrink-0 text-slate-700 dark:text-slate-300 hover:border-emerald-500"
+        >
+          Appliances
+        </Link>
       </div>
     </header>
   );

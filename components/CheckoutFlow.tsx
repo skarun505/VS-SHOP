@@ -18,6 +18,8 @@ import {
   Sparkles,
   Smartphone,
   ChevronLeft,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 interface UnitWithProduct {
@@ -89,6 +91,8 @@ export function CheckoutFlow({ unit, initialCoupon }: CheckoutFlowProps) {
   const [submittingUtr, setSubmittingUtr] = useState(false);
   const [utrError, setUtrError] = useState<string | null>(null);
   const [copiedVpa, setCopiedVpa] = useState(false);
+  const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false);
+  const [paymentModeTab, setPaymentModeTab] = useState<"app" | "qr">("app");
 
   // Countdown timer for 30 minutes
   const [timeLeftSeconds, setTimeLeftSeconds] = useState(30 * 60);
@@ -264,6 +268,16 @@ export function CheckoutFlow({ unit, initialCoupon }: CheckoutFlowProps) {
     setTimeout(() => setCopiedVpa(false), 2000);
   };
 
+  const handlePasteUtr = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      const clean = text.replace(/\D/g, "").slice(0, 12);
+      if (clean) setUtr(clean);
+    } catch {
+      // Browser permissions or unsupported
+    }
+  };
+
   const formatTimer = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -278,31 +292,102 @@ export function CheckoutFlow({ unit, initialCoupon }: CheckoutFlowProps) {
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
-      {/* Top Breadcrumb */}
-      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
+    <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
+      {/* Top Breadcrumb & Security Badge */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 sm:pb-4 gap-2">
         <button
           onClick={() => (step === "payment" ? setStep("shipping") : router.back())}
-          className="text-xs font-semibold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-1.5"
+          className="text-xs font-semibold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-1.5 self-start"
         >
           <ChevronLeft className="w-4 h-4" />
           {step === "payment" ? "Edit Shipping Details" : "Back to Product"}
         </button>
 
-        <div className="flex items-center gap-2 text-xs text-slate-500">
+        <div className="flex items-center gap-2 text-[11px] sm:text-xs text-slate-500">
           <Lock className="w-3.5 h-3.5 text-emerald-600" />
-          <span>256-Bit SSL Encrypted Checkout</span>
+          <span>256-Bit SSL Encrypted &bull; Guaranteed Delivery</span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      {/* Mobile Collapsible Order Summary Card (Only on Mobile) */}
+      <div className="lg:hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
+        <button
+          type="button"
+          onClick={() => setMobileSummaryOpen(!mobileSummaryOpen)}
+          className="w-full px-4 py-3 flex items-center justify-between text-left bg-slate-50/70 dark:bg-slate-850/60 transition-colors"
+        >
+          <div className="flex items-center gap-3 min-w-0 pr-2">
+            <div className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 p-1 border border-slate-200 dark:border-slate-800 shrink-0 flex items-center justify-center">
+              <img
+                src={images[0] || ""}
+                alt={unit.product.title}
+                className="max-h-full max-w-full object-contain"
+              />
+            </div>
+            <div className="min-w-0">
+              <div className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                {unit.product.title}
+              </div>
+              <div className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1.5 mt-0.5">
+                <span>{formatINR(payableAmount)}</span>
+                <span className="text-slate-300 dark:text-slate-700">&bull;</span>
+                <span className="text-slate-500 font-normal flex items-center gap-0.5">
+                  {mobileSummaryOpen ? "Hide breakdown" : "View breakdown"}
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform ${
+                      mobileSummaryOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </span>
+              </div>
+            </div>
+          </div>
+          <span className="text-sm font-black text-slate-900 dark:text-slate-100 shrink-0 font-mono">
+            {formatINR(payableAmount)}
+          </span>
+        </button>
+
+        {mobileSummaryOpen && (
+          <div className="p-4 border-t border-slate-100 dark:border-slate-800 space-y-2.5 text-xs bg-white dark:bg-slate-900">
+            <div className="flex justify-between text-slate-600 dark:text-slate-400">
+              <span>Listing Price</span>
+              <span className="font-semibold">{formatINR(unit.pricePaise)}</span>
+            </div>
+            {couponDiscountPaise > 0 && (
+              <div className="flex justify-between text-emerald-600 font-semibold">
+                <span className="flex items-center gap-1">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Coupon Discount ({appliedCoupon})
+                </span>
+                <span>- {formatINR(couponDiscountPaise)}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-slate-600 dark:text-slate-400">
+              <span>Insured Shipping</span>
+              <span className="text-emerald-600 font-bold uppercase text-[10px] bg-emerald-50 dark:bg-emerald-950 px-1.5 py-0.5 rounded">
+                Free
+              </span>
+            </div>
+            <div className="flex justify-between text-slate-600 dark:text-slate-400">
+              <span>GST Tax (Margin Scheme)</span>
+              <span>Included</span>
+            </div>
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-between font-bold text-slate-900 dark:text-slate-100">
+              <span>Total Amount</span>
+              <span className="text-sm font-black font-mono">{formatINR(payableAmount)}</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
         {/* Left Column: Flow Screens */}
         <div className="lg:col-span-7">
           {step === "shipping" ? (
             /* STEP 1: SHIPPING ADDRESS */
-            <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-xs space-y-6">
+            <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-6 shadow-xs space-y-5 sm:space-y-6">
               <div>
-                <h2 className="text-xl font-black text-slate-900 dark:text-slate-100">
+                <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100">
                   Delivery Address &amp; Contact
                 </h2>
                 <p className="text-xs text-slate-500 mt-1">
@@ -318,18 +403,19 @@ export function CheckoutFlow({ unit, initialCoupon }: CheckoutFlowProps) {
               )}
 
               <form onSubmit={handleInitiateOrder} className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                      Full Legal Name *
+                      Full Name *
                     </label>
                     <input
                       type="text"
                       required
+                      autoComplete="name"
                       placeholder="e.g. Rahul Sharma"
                       value={shipping.name}
                       onChange={(e) => setShipping({ ...shipping, name: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                      className="w-full px-3.5 py-3 sm:py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
                     />
                   </div>
 
@@ -340,11 +426,13 @@ export function CheckoutFlow({ unit, initialCoupon }: CheckoutFlowProps) {
                     <input
                       type="tel"
                       required
+                      inputMode="tel"
+                      autoComplete="tel"
                       placeholder="e.g. 9876543210"
                       maxLength={10}
                       value={shipping.phone}
                       onChange={(e) => setShipping({ ...shipping, phone: e.target.value.replace(/\D/g, "") })}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                      className="w-full px-3.5 py-3 sm:py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
                     />
                   </div>
                 </div>
@@ -356,10 +444,11 @@ export function CheckoutFlow({ unit, initialCoupon }: CheckoutFlowProps) {
                   <textarea
                     required
                     rows={2}
+                    autoComplete="street-address"
                     placeholder="e.g. Flat 402, Sunshine Heights, 12th Cross, Indiranagar"
                     value={shipping.address}
                     onChange={(e) => setShipping({ ...shipping, address: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 resize-none"
+                    className="w-full px-3.5 py-3 sm:py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 resize-none"
                   />
                 </div>
 
@@ -371,10 +460,11 @@ export function CheckoutFlow({ unit, initialCoupon }: CheckoutFlowProps) {
                     <input
                       type="text"
                       required
+                      autoComplete="address-level2"
                       placeholder="Bangalore"
                       value={shipping.city}
                       onChange={(e) => setShipping({ ...shipping, city: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                      className="w-full px-3.5 py-3 sm:py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
                     />
                   </div>
 
@@ -385,9 +475,10 @@ export function CheckoutFlow({ unit, initialCoupon }: CheckoutFlowProps) {
                     <input
                       type="text"
                       required
+                      autoComplete="address-level1"
                       value={shipping.state}
                       onChange={(e) => setShipping({ ...shipping, state: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                      className="w-full px-3.5 py-3 sm:py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
                     />
                   </div>
 
@@ -398,11 +489,13 @@ export function CheckoutFlow({ unit, initialCoupon }: CheckoutFlowProps) {
                     <input
                       type="text"
                       required
+                      inputMode="numeric"
+                      autoComplete="postal-code"
                       placeholder="560038"
                       maxLength={6}
                       value={shipping.pincode}
                       onChange={(e) => setShipping({ ...shipping, pincode: e.target.value.replace(/\D/g, "") })}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                      className="w-full px-3.5 py-3 sm:py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
                     />
                   </div>
                 </div>
@@ -418,13 +511,13 @@ export function CheckoutFlow({ unit, initialCoupon }: CheckoutFlowProps) {
                       placeholder="Enter EXIT5"
                       value={couponCode}
                       onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                      className="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 font-mono text-sm uppercase focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                      className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 font-mono text-base sm:text-sm uppercase focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
                     />
                     <button
                       type="button"
                       onClick={() => applyCoupon(couponCode)}
                       disabled={isApplyingCoupon || !couponCode}
-                      className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition-colors disabled:opacity-50"
+                      className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition-colors disabled:opacity-50 shrink-0"
                     >
                       {isApplyingCoupon ? "Checking..." : "Apply"}
                     </button>
@@ -464,9 +557,9 @@ export function CheckoutFlow({ unit, initialCoupon }: CheckoutFlowProps) {
           ) : (
             /* STEP 2: MANUAL UPI PAYMENT (Section 6B) */
             orderData && (
-              <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-xs space-y-6">
+              <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-6 shadow-xs space-y-5 sm:space-y-6">
                 {/* Hold Timer Banner */}
-                <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between text-amber-800 dark:text-amber-300">
+                <div className="p-3 sm:p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between text-amber-800 dark:text-amber-300">
                   <div className="flex items-center gap-2 text-xs font-bold">
                     <Clock className="w-4 h-4 animate-spin text-amber-600" />
                     <span>Unit Reserved For:</span>
@@ -477,7 +570,7 @@ export function CheckoutFlow({ unit, initialCoupon }: CheckoutFlowProps) {
                 </div>
 
                 <div>
-                  <h2 className="text-xl font-black text-slate-900 dark:text-slate-100">
+                  <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100">
                     Pay with UPI (Instant Verification)
                   </h2>
                   <p className="text-xs text-slate-500 mt-1">
@@ -486,10 +579,43 @@ export function CheckoutFlow({ unit, initialCoupon }: CheckoutFlowProps) {
                   </p>
                 </div>
 
-                {/* QR Code and Desktop instructions */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center p-4 rounded-xl bg-slate-50 dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800">
-                  <div className="flex flex-col items-center">
-                    <div className="w-48 h-48 bg-white p-2.5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-center">
+                {/* Mobile View Switcher (1-Click App vs Scan QR) */}
+                <div className="sm:hidden grid grid-cols-2 p-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentModeTab("app")}
+                    className={`py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                      paymentModeTab === "app"
+                        ? "bg-white dark:bg-slate-900 text-emerald-600 shadow-xs"
+                        : "text-slate-500 hover:text-slate-700"
+                    }`}
+                  >
+                    <Smartphone className="w-3.5 h-3.5" />
+                    <span>Open UPI App</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentModeTab("qr")}
+                    className={`py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                      paymentModeTab === "qr"
+                        ? "bg-white dark:bg-slate-900 text-emerald-600 shadow-xs"
+                        : "text-slate-500 hover:text-slate-700"
+                    }`}
+                  >
+                    <QrCode className="w-3.5 h-3.5" />
+                    <span>Scan QR Code</span>
+                  </button>
+                </div>
+
+                {/* UPI Payment Container */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 items-center p-4 sm:p-5 rounded-2xl bg-slate-50/80 dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800">
+                  {/* QR Code Column (Hidden on mobile if tab is 'app') */}
+                  <div
+                    className={`flex flex-col items-center ${
+                      paymentModeTab === "app" ? "hidden sm:flex" : "flex"
+                    }`}
+                  >
+                    <div className="w-44 h-44 sm:w-48 sm:h-48 bg-white p-2.5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-center">
                       {orderData.qrCode ? (
                         <img
                           src={orderData.qrCode}
@@ -500,64 +626,75 @@ export function CheckoutFlow({ unit, initialCoupon }: CheckoutFlowProps) {
                         <QrCode className="w-24 h-24 text-slate-400" />
                       )}
                     </div>
-                    <span className="text-[11px] text-slate-500 mt-2 font-medium">
+                    <span className="text-[11px] text-slate-500 mt-2 text-center font-medium">
                       Scan with any UPI App (GPay, PhonePe, Paytm, CRED)
                     </span>
                   </div>
 
-                  {/* Mobile Deep link buttons */}
-                  <div className="space-y-3">
+                  {/* Direct Mobile Links Column (Hidden on mobile if tab is 'qr') */}
+                  <div
+                    className={`space-y-3.5 w-full ${
+                      paymentModeTab === "qr" ? "hidden sm:block" : "block"
+                    }`}
+                  >
                     <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                      Or Open Installed UPI App (Mobile):
+                      Tap to Pay with Installed App:
                     </div>
 
                     <a
                       href={orderData.upiLink}
-                      className="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition-colors"
+                      className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition-colors active:scale-98"
                     >
                       <Smartphone className="w-4 h-4" />
-                      Open Any UPI App
-                      <ExternalLink className="w-3 h-3 ml-auto opacity-70" />
+                      <span>Open Any UPI App</span>
+                      <ExternalLink className="w-3.5 h-3.5 ml-auto opacity-70" />
                     </a>
 
                     <div className="grid grid-cols-3 gap-2">
                       <a
                         href={orderData.appLinks.phonepe}
-                        className="py-2 px-1 text-center rounded-lg bg-indigo-600 text-white text-[11px] font-semibold hover:bg-indigo-500 transition-colors"
+                        className="py-2.5 px-1 text-center rounded-xl bg-indigo-600 text-white text-[11px] font-bold hover:bg-indigo-500 transition-colors shadow-xs"
                       >
                         PhonePe
                       </a>
                       <a
                         href={orderData.appLinks.gpay}
-                        className="py-2 px-1 text-center rounded-lg bg-blue-600 text-white text-[11px] font-semibold hover:bg-blue-500 transition-colors"
+                        className="py-2.5 px-1 text-center rounded-xl bg-blue-600 text-white text-[11px] font-bold hover:bg-blue-500 transition-colors shadow-xs"
                       >
                         Google Pay
                       </a>
                       <a
                         href={orderData.appLinks.paytm}
-                        className="py-2 px-1 text-center rounded-lg bg-sky-600 text-white text-[11px] font-semibold hover:bg-sky-500 transition-colors"
+                        className="py-2.5 px-1 text-center rounded-xl bg-sky-600 text-white text-[11px] font-bold hover:bg-sky-500 transition-colors shadow-xs"
                       >
                         Paytm
                       </a>
                     </div>
 
                     {/* VPA Copy Fallback (Section 6B.3) */}
-                    <div className="pt-2">
-                      <div className="text-[11px] text-slate-500 mb-1">
-                        Manual UPI VPA Fallback:
+                    <div className="pt-1">
+                      <div className="text-[11px] text-slate-500 mb-1 font-medium">
+                        UPI ID / VPA:
                       </div>
-                      <div className="flex items-center justify-between p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs">
-                        <span className="font-mono text-slate-700 dark:text-slate-300 font-semibold select-all">
+                      <div className="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs">
+                        <span className="font-mono text-slate-700 dark:text-slate-300 font-semibold select-all text-xs truncate mr-2">
                           {orderData.vpa}
                         </span>
                         <button
+                          type="button"
                           onClick={() => copyToClipboard(orderData.vpa)}
-                          className="p-1 rounded text-slate-500 hover:text-emerald-600 transition-colors"
+                          className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-bold flex items-center gap-1 transition-colors shrink-0"
                         >
                           {copiedVpa ? (
-                            <Check className="w-4 h-4 text-emerald-600" />
+                            <>
+                              <Check className="w-3.5 h-3.5 text-emerald-600" />
+                              <span className="text-emerald-600">Copied</span>
+                            </>
                           ) : (
-                            <Copy className="w-4 h-4" />
+                            <>
+                              <Copy className="w-3.5 h-3.5" />
+                              <span>Copy</span>
+                            </>
                           )}
                         </button>
                       </div>
@@ -566,7 +703,7 @@ export function CheckoutFlow({ unit, initialCoupon }: CheckoutFlowProps) {
                 </div>
 
                 {/* Step 3: Enter 12-Digit UTR */}
-                <div className="p-5 rounded-2xl border-2 border-emerald-500/40 bg-emerald-50/20 dark:bg-emerald-950/20 space-y-4">
+                <div className="p-4 sm:p-5 rounded-2xl border-2 border-emerald-500/40 bg-emerald-50/20 dark:bg-emerald-950/20 space-y-4">
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-100 dark:bg-emerald-950 px-2 py-0.5 rounded-full">
                       Step 2: Confirm Payment
@@ -574,13 +711,13 @@ export function CheckoutFlow({ unit, initialCoupon }: CheckoutFlowProps) {
                     <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mt-1">
                       Enter the 12-Digit UTR / Transaction Ref No.
                     </h3>
-                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
                       After completing the payment in your UPI app, copy the 12-digit UTR from your transaction details and paste it below.
                     </p>
                   </div>
 
                   {utrError && (
-                    <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-600 text-xs flex items-center gap-2">
+                    <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 text-xs flex items-center gap-2">
                       <AlertCircle className="w-4 h-4 shrink-0" />
                       <span>{utrError}</span>
                     </div>
@@ -588,18 +725,33 @@ export function CheckoutFlow({ unit, initialCoupon }: CheckoutFlowProps) {
 
                   <form onSubmit={handleSubmitUtr} className="space-y-3">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                        12-Digit Bank UTR / UPI Ref ID *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        maxLength={12}
-                        placeholder="e.g. 428901928374"
-                        value={utr}
-                        onChange={(e) => setUtr(e.target.value.replace(/\D/g, ""))}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-mono text-base font-bold tracking-widest text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                      />
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                          12-Digit Bank UTR / UPI Ref ID *
+                        </label>
+                        <span className="text-[10px] text-slate-400 font-mono">
+                          {utr.length}/12 Digits
+                        </span>
+                      </div>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          required
+                          inputMode="numeric"
+                          maxLength={12}
+                          placeholder="e.g. 428901928374"
+                          value={utr}
+                          onChange={(e) => setUtr(e.target.value.replace(/\D/g, ""))}
+                          className="w-full pl-3.5 pr-20 py-3 sm:py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-mono text-base font-bold tracking-widest text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={handlePasteUtr}
+                          className="absolute right-2 top-2 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-xs font-bold transition-colors"
+                        >
+                          Paste
+                        </button>
+                      </div>
                     </div>
 
                     <div>
@@ -612,14 +764,14 @@ export function CheckoutFlow({ unit, initialCoupon }: CheckoutFlowProps) {
                         placeholder="Name as registered on bank account"
                         value={payerName}
                         onChange={(e) => setPayerName(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                        className="w-full px-3.5 py-3 sm:py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
                       />
                     </div>
 
                     <button
                       type="submit"
                       disabled={submittingUtr || utr.length !== 12}
-                      className="w-full py-4 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-md transition-colors flex items-center justify-center gap-2 disabled:bg-slate-300 disabled:cursor-not-allowed"
+                      className="w-full py-4 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-md transition-colors flex items-center justify-center gap-2 disabled:bg-slate-300 disabled:cursor-not-allowed"
                     >
                       {submittingUtr ? (
                         <span>Validating UTR &amp; Extending Hold...</span>
