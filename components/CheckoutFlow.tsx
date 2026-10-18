@@ -105,6 +105,24 @@ export function CheckoutFlow({ unit, initialCoupon }: CheckoutFlowProps) {
     return () => clearInterval(interval);
   }, [step]);
 
+  // Auto-populate delivery location if detected previously
+  useEffect(() => {
+    try {
+      const savedLoc = localStorage.getItem("pt_user_location");
+      if (savedLoc) {
+        const parsed = JSON.parse(savedLoc);
+        if (parsed.city || parsed.pincode) {
+          setShipping((prev) => ({
+            ...prev,
+            city: prev.city || parsed.city || "",
+            pincode: prev.pincode || parsed.pincode || "",
+            state: prev.state || parsed.state || "Karnataka",
+          }));
+        }
+      }
+    } catch {}
+  }, []);
+
   // Apply initial coupon if provided
   useEffect(() => {
     if (initialCoupon) {
