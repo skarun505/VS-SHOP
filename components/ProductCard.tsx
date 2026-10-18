@@ -1,8 +1,7 @@
 import React from "react";
 import Link from "next/link";
-import { ConditionBadge } from "./ConditionBadge";
 import { formatINR, calculateSavingsPercent } from "@/lib/utils";
-import { Shield, Sparkles, Star, Zap, ArrowRight } from "lucide-react";
+import { Star, ArrowRight, Zap, Shield } from "lucide-react";
 
 interface ProductCardProps {
   product: {
@@ -53,118 +52,79 @@ export function ProductCard({ product }: ProductCardProps) {
       ? availableUnits[0].grade
       : product.units[0]?.grade || "A";
   const savingsPercent = calculateSavingsPercent(product.mrp, minPrice);
-  const savingsRupees = Math.max(0, (product.mrp - minPrice) / 100);
 
-  // Ratings calculation
-  const reviewCount = product.reviews?.length || 18;
-  const avgRating =
-    product.reviews && product.reviews.length > 0
-      ? (product.reviews.reduce((acc, r) => acc + r.rating, 0) / product.reviews.length).toFixed(1)
-      : "4.8";
+  const gradeLabel =
+    topGrade === "A_PLUS"
+      ? "Untouched Mint"
+      : topGrade === "A"
+      ? "Like New"
+      : "Certified";
 
   return (
     <Link
       href={`/product/${product.slug}`}
-      className="group relative flex flex-col rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-xs hover:shadow-md hover:border-emerald-500/50 transition-all duration-300 overflow-hidden active:scale-[0.98]"
+      className="group flex flex-col rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs hover:shadow-md hover:border-emerald-500 transition-all duration-200 overflow-hidden active:scale-[0.98]"
     >
-      {/* Media Image Area (Amazon / Flipkart card style) */}
-      <div className="relative aspect-square w-full overflow-hidden bg-slate-50 dark:bg-slate-950 p-2 sm:p-5 flex items-center justify-center border-b border-slate-100 dark:border-slate-800/80">
+      {/* 1. CLEAN Product Image (Zero overlays covering the photo) */}
+      <div className="relative aspect-square w-full overflow-hidden bg-slate-50 dark:bg-slate-950 p-3 sm:p-5 flex items-center justify-center border-b border-slate-100 dark:border-slate-800/80">
         <img
           src={mainImage}
           alt={product.title}
           className="h-full w-full object-contain object-center group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
         />
-
-        {/* Condition Grade Badge on top right */}
-        <div className="absolute top-2 right-2 scale-85 sm:scale-100 origin-top-right">
-          <ConditionBadge grade={topGrade} size="sm" />
-        </div>
-
-        {/* Savings Ribbon on top left (Amazon / Zepto style) */}
-        {savingsPercent > 0 && (
-          <div className="absolute top-2 left-2 bg-rose-600 text-white font-black text-[9px] sm:text-xs px-2 py-0.5 rounded-full shadow-xs flex items-center gap-1">
-            <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-            <span>{savingsPercent}% OFF</span>
-          </div>
-        )}
-
-        {/* Stock / Fast Dispatch indicator */}
-        <div className="absolute bottom-1.5 left-2 flex items-center gap-1">
-          {availableUnits.length > 0 ? (
-            <span className="text-[8px] sm:text-[9px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50/95 dark:bg-emerald-950/95 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800 flex items-center gap-0.5">
-              <Zap className="w-2.5 h-2.5 fill-emerald-600" />
-              <span>{availableUnits.length} Left</span>
-            </span>
-          ) : (
-            <span className="text-[8px] sm:text-[9px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
-              Sold Out
-            </span>
-          )}
-        </div>
       </div>
 
-      {/* Card Info */}
-      <div className="flex flex-1 flex-col p-2.5 sm:p-4 justify-between space-y-1.5">
+      {/* 2. Product Information & Clear Buy Action */}
+      <div className="flex flex-1 flex-col p-2.5 sm:p-4 justify-between space-y-2">
         <div>
-          {/* Brand & Model */}
-          <div className="text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-0.5 flex items-center justify-between">
-            <span className="font-bold text-emerald-600">{product.brand}</span>
-            <span className="font-mono text-slate-400 text-[9px] sm:text-[10px] truncate max-w-[70px]">
-              {product.modelNumber}
+          {/* Brand & Condition Pill */}
+          <div className="flex items-center justify-between text-[10px] sm:text-[11px] mb-1">
+            <span className="font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              {product.brand}
+            </span>
+            <span className="font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/80 px-1.5 py-0.5 rounded text-[9px]">
+              {gradeLabel}
             </span>
           </div>
 
-          {/* Product Title */}
+          {/* Title (Clean 2 lines max) */}
           <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 line-clamp-2 leading-snug group-hover:text-emerald-600 transition-colors">
             {product.title}
           </h3>
 
-          {/* Flipkart / Amazon Star Rating */}
-          <div className="flex items-center gap-1 pt-1">
-            <div className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-md bg-emerald-600 text-white text-[9px] font-black">
-              <span>{avgRating}</span>
-              <Star className="w-2.5 h-2.5 fill-white" />
-            </div>
-            <span className="text-[9px] text-slate-400">({reviewCount})</span>
-          </div>
-        </div>
-
-        <div className="pt-1.5 border-t border-slate-100 dark:border-slate-800 space-y-1">
-          {/* Price & MRP (Amazon / Flipkart layout) */}
-          <div className="flex items-baseline flex-wrap gap-1">
-            <span className="text-sm sm:text-base lg:text-lg font-black text-slate-900 dark:text-slate-100 font-mono">
+          {/* Price row */}
+          <div className="mt-1.5 flex items-baseline flex-wrap gap-1.5">
+            <span className="text-base sm:text-lg font-black text-slate-950 dark:text-white font-mono">
               {formatINR(minPrice)}
             </span>
             {product.mrp > minPrice && (
-              <span className="text-[10px] sm:text-xs text-slate-400 line-through">
+              <span className="text-[11px] sm:text-xs text-slate-400 line-through">
                 {formatINR(product.mrp)}
+              </span>
+            )}
+            {savingsPercent > 0 && (
+              <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 dark:bg-emerald-950 px-1.5 py-0.2 rounded">
+                {savingsPercent}% OFF
               </span>
             )}
           </div>
 
-          {/* Savings in Rupees */}
-          {savingsRupees > 0 && (
-            <div className="text-[9px] sm:text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
-              Save ₹{savingsRupees.toLocaleString("en-IN")}
-            </div>
-          )}
-
-          {/* Zepto / Amazon Prime Fast Delivery Badge */}
-          <div className="text-[9px] font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-1">
-            <span className="text-emerald-600 font-bold">⚡ FREE</span>
-            <span>Delivery Tomorrow</span>
+          {/* Delivery & Warranty info */}
+          <div className="mt-1 flex items-center justify-between text-[10px] text-slate-500">
+            <span className="text-emerald-600 font-semibold flex items-center gap-0.5">
+              <Zap className="w-3 h-3 fill-emerald-600" />
+              <span>Free Delivery</span>
+            </span>
+            <span>{product.warrantyMonths}m Warranty</span>
           </div>
+        </div>
 
-          {/* Mobile View / Buy Deal Button */}
-          <div className="pt-1">
-            <button
-              type="button"
-              className="w-full py-1.5 px-2 rounded-xl bg-slate-900 hover:bg-emerald-600 dark:bg-slate-800 dark:hover:bg-emerald-600 text-white font-bold text-[11px] flex items-center justify-center gap-1 shadow-xs transition-colors"
-            >
-              <span>View Deal</span>
-              <ArrowRight className="w-3 h-3" />
-            </button>
+        {/* 3. PROMINENT BUY BUTTON (Impossible to miss, easy 1-tap) */}
+        <div className="pt-1">
+          <div className="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 group-hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-colors">
+            <span>Buy Now</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </div>
         </div>
       </div>
